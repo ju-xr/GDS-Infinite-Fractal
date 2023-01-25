@@ -20,7 +20,7 @@ public class ShaderSetup : MonoBehaviour
     public MandelSet mandelset;
 
     #region Mandelbulb Property
-    private Material material_Mandelbulb;
+    public Material material_Mandelbulb;
 
     [Header("sphere marching")]
     [Range(1, 400)]
@@ -69,22 +69,38 @@ public class ShaderSetup : MonoBehaviour
 
     #region Mandelbrot Property
     [Header("Mandelbrot")]
-    private Material material_Mandelbrot;
+    public Material material_Mandelbrot;
     public Vector2 position;
     public float scale_Mandelbrot, angle_Mandelbrot;
     public float color_Mandelbrot;
     public float symmetry_Mandelbrot;
+    public float animation_Mandelbrot;
     public int iteration_Mandelbrot;
     public float speed_Mandelbrot;
+    public float repeat_Mandelbrot;
+    public int pattern_Mandelbrot;
 
     private Vector2 smoothPos;
     private float smoothScale, smoothAngle;
 
     #endregion
 
+    #region UI
+    public GameObject brotPanel;
+    public GameObject bulbPanel;
+    public GameObject keyboardControl;
+    private bool instruToggle = true;
+    #endregion
+
     private Camera c;
     public float zoomSpeed;
     public float rotateSpeed = 2;
+
+    void Awake()
+    {
+        material_Mandelbrot = new Material(Shader.Find("Ju/Mandelbrot_S"));
+        material_Mandelbulb = new Material(Shader.Find("Ju/Mandelbulb_S"));
+    }
 
     void Start()
     {
@@ -109,6 +125,12 @@ public class ShaderSetup : MonoBehaviour
             MandelbrotControl();
         }
         cameraControl();
+
+        if (Input.GetKeyDown(KeyCode.H))
+        {
+            instruToggle = !instruToggle;
+            keyboardControl.SetActive(instruToggle);
+        }
     }
 
     void cameraControl()
@@ -265,12 +287,6 @@ public class ShaderSetup : MonoBehaviour
             position += dir;
     }
 
-    void Awake()
-    {
-        material_Mandelbulb = new Material(Shader.Find("Ju/Mandelbulb_S"));
-        material_Mandelbrot = new Material(Shader.Find("Ju/Mandelbrot_S"));
-    }
-
     #region Mandelbrot_UI
     public void SetIterations_Mandelbrot(float n)
     {
@@ -287,9 +303,14 @@ public class ShaderSetup : MonoBehaviour
         symmetry_Mandelbrot = n;
     }
 
-    public void SetSpeed(float n)
+    public void SetPattern(float n)
     {
-        speed_Mandelbrot = n;
+        pattern_Mandelbrot = (int)n;
+    }
+
+    public void SetAnimation(float n)
+    {
+        animation_Mandelbrot = n;
     }
     #endregion
 
@@ -341,9 +362,12 @@ public class ShaderSetup : MonoBehaviour
         material_Mandelbrot.SetVector("_Area", new Vector4(smoothPos.x, smoothPos.y, scaleX, scaleY));
         material_Mandelbrot.SetFloat("_Angle", smoothAngle);
         material_Mandelbrot.SetFloat("_Color", color_Mandelbrot);
+        material_Mandelbrot.SetFloat("_Repeat", repeat_Mandelbrot);
         material_Mandelbrot.SetFloat("_Symmetry", symmetry_Mandelbrot);
         material_Mandelbrot.SetFloat("_Speed", speed_Mandelbrot);
-        material_Mandelbrot.SetInt("_MaxIter", iteration_Mandelbrot);
+        material_Mandelbrot.SetFloat("_Angle", smoothAngle);
+        material_Mandelbrot.SetFloat("_Animation", animation_Mandelbrot);
+        material_Mandelbrot.SetInt("_Pattern", pattern_Mandelbrot);
     }
 
     void SetMandelbulbParameters()
@@ -353,7 +377,7 @@ public class ShaderSetup : MonoBehaviour
             lightdirection = GameObject.FindGameObjectWithTag("MainLight").transform;
         }
 
-        //material.SetTexture("_SkyboxTexture", SkyboxTexture);
+        //material_Mandelbulb.SetTexture("_SkyboxTexture", SkyboxTexture);
         material_Mandelbulb.SetMatrix("_CTW", Camera.main.cameraToWorldMatrix);
         material_Mandelbulb.SetMatrix("_PMI", Camera.main.projectionMatrix.inverse);
         material_Mandelbulb.SetFloat("maxDst", maxDst);
@@ -378,10 +402,12 @@ public class ShaderSetup : MonoBehaviour
         if(i == 0)
         {
             mandelset = MandelSet.Mandelbrot;
+            BrotPanel();
         }
         if(i == 1)
         {
             mandelset = MandelSet.Mandelbulb;
+            BulbPanel();
         }
     }
 
@@ -402,5 +428,18 @@ public class ShaderSetup : MonoBehaviour
                 break;
         }
     }
+
+    public void BrotPanel()
+    {
+        brotPanel.SetActive(true);
+        bulbPanel.SetActive(false);
+    }
+
+    public void BulbPanel()
+    {
+        brotPanel.SetActive(false);
+        bulbPanel.SetActive(true);
+    }
+
 
 }

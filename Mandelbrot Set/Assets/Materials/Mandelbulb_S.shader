@@ -1,8 +1,10 @@
 Shader "Ju/Mandelbulb_S"
 {
+    //code reference: https://github.com/sjoerdev/mandelbulb
     Properties
     {
         _MainTex ("Texture", 2D) = "white" {}
+        _Hue("Hue", float) = 0.5
     }
     SubShader
     {
@@ -53,6 +55,7 @@ Shader "Ju/Mandelbulb_S"
             static const float PI = 3.14159265f;
             float4x4 _CTW;
             float4x4 _PMI;
+            float _Hue;
 
 
             // distance estimators and their normals
